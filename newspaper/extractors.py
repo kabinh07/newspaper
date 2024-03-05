@@ -495,11 +495,9 @@ class ContentExtractor(object):
                         english_pattern.findall(description)
                         clean_description = english_pattern.sub('', description)
                         return clean_description
-                        # return 'Kavin is the best'
                 except:
                     continue
-        else:
-            return self.get_meta_content(doc, "meta[name=description]")
+        return self.get_meta_content(doc, "meta[name=description]")
 
     def get_meta_keywords(self, doc):
         """If the article has meta keywords set in the source, use that
