@@ -16,6 +16,7 @@ import logging
 import re
 import re
 from collections import defaultdict
+import json
 
 from dateutil.parser import parse as date_parser
 from tldextract import tldextract
@@ -482,7 +483,23 @@ class ContentExtractor(object):
     def get_meta_description(self, doc):
         """If the article has meta description set in the source, use that
         """
-        return self.get_meta_content(doc, "meta[name=description]")
+        scripts = self.parser.css_select(doc, 'script[type="application/ld+json"]')
+        english_pattern = re.compile(r'[a-zA-Z0-9&;/]')
+        if len(scripts)>0:
+            for script in scripts:
+                try:
+                    value = str(script.text_content())
+                    file = json.loads(value)
+                    if 'articleBody' in file.keys():
+                        description = file['articleBody']
+                        english_pattern.findall(description)
+                        clean_description = english_pattern.sub('', description)
+                        return clean_description
+                        # return 'Kavin is the best'
+                except:
+                    continue
+        else:
+            return self.get_meta_content(doc, "meta[name=description]")
 
     def get_meta_keywords(self, doc):
         """If the article has meta keywords set in the source, use that
